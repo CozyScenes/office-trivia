@@ -58,7 +58,7 @@
 
   .show-label {
     font-family: 'Special Elite', cursive;
-    font-size: 11px;
+    font-size: 13px;
     letter-spacing: 0.2em;
     text-transform: uppercase;
     color: var(--muted);
@@ -89,7 +89,7 @@
   }
 
   .category-tag {
-    font-size: 11px;
+    font-size: 13px;
     letter-spacing: 0.25em;
     text-transform: uppercase;
     color: var(--muted);
@@ -100,16 +100,18 @@
 
   .trivia-text {
     font-family: 'Special Elite', cursive;
-    font-size: 24px;
-    line-height: 1.5;
+    font-size: 32px;
+    font-weight: 700;
+    line-height: 1.45;
     color: var(--ink);
     max-width: 95%;
   }
 
   .trivia-text.answer-text {
-    font-size: 30px;
+    font-size: 40px;
+    font-weight: 700;
     color: var(--accent);
-    line-height: 1.35;
+    line-height: 1.3;
   }
 
   .bottom-bar {
@@ -132,7 +134,6 @@
     letter-spacing: 0.1em;
   }
 
-  /* Q decoration */
   .q-mark {
     font-family: 'Special Elite', cursive;
     font-size: 72px;
@@ -181,9 +182,10 @@
 
   .small-answer {
     font-family: 'Special Elite', cursive;
-    font-size: 28px;
+    font-size: 36px;
+    font-weight: 700;
     color: var(--accent);
-    line-height: 1.35;
+    line-height: 1.3;
   }
 
   .small-ep {
@@ -216,7 +218,6 @@
     </div>
   </div>
 </div>
-
 
 <!-- SMALL VIEW: shows answer -->
 <div id="small-view">
@@ -333,9 +334,18 @@ const TRIVIA = [
 function getSeed() {
   // Changes every 30 minutes — both instances stay in sync
   const now = new Date();
-  const slot = Math.floor((now.getFullYear() * 10000 + (now.getMonth()+1) * 100 + now.getDate()) * 48 +
-    Math.floor((now.getHours() * 60 + now.getMinutes()) / 30));
-  return slot;
+  const slot = Math.floor(
+    (now.getFullYear() * 10000 + (now.getMonth()+1) * 100 + now.getDate()) * 48 +
+    Math.floor((now.getHours() * 60 + now.getMinutes()) / 30)
+  );
+  // Hash the slot so consecutive windows don't step through questions linearly.
+  // Without this, the LCG multiplier creates a fixed stride of ~39 between slots,
+  // meaning only ~50 unique questions appear before cycling.
+  let h = slot >>> 0;
+  h = Math.imul(h ^ (h >>> 16), 0x45d9f3b);
+  h = Math.imul(h ^ (h >>> 16), 0x45d9f3b);
+  h = (h ^ (h >>> 16)) >>> 0;
+  return h;
 }
 
 function seededRandom(seed) {
@@ -356,15 +366,13 @@ function getItem() {
 // ── INIT ──
 function getMode() {
   const params = new URLSearchParams(window.location.search);
-  return params.get('mode') || 'question'; // 'question' or 'answer'
+  return params.get('mode') || 'question';
 }
 
 function getViewSize() {
-  // TRMNL passes view param, or we detect from iframe size
   const params = new URLSearchParams(window.location.search);
   const v = params.get('view');
   if (v) return v;
-  // fallback: width-based
   const w = window.innerWidth;
   if (w >= 700) return 'full';
   if (w >= 400) return 'half';
@@ -399,7 +407,6 @@ function init() {
     document.getElementById('seed-disp').textContent = '#' + (seed % 10000);
 
   } else {
-    // Small views — always show answer
     document.getElementById('small-view').style.display = 'flex';
     document.getElementById('small-answer').textContent = item.a;
     document.getElementById('small-ep').textContent = item.cat + ' · ' + item.ep;
