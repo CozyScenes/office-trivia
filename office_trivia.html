@@ -163,36 +163,34 @@
     display: none;
     width: 100%; height: 100%;
     flex-direction: column;
-    align-items: center;
     justify-content: center;
-    padding: 16px;
-    text-align: center;
+    padding: 18px 20px;
+    position: relative;
   }
 
   .small-logo {
-    font-family: 'Special Elite', cursive;
-    font-size: 13px;
-    letter-spacing: 0.2em;
+    font-family: 'Courier Prime', monospace;
+    font-size: 9px;
+    letter-spacing: 0.25em;
     text-transform: uppercase;
     color: var(--muted);
-    margin-bottom: 8px;
-  }
-
-  .small-hint {
-    font-family: 'Special Elite', cursive;
-    font-size: 15px;
-    color: var(--ink);
-    line-height: 1.4;
     margin-bottom: 10px;
+    border-left: 3px solid var(--accent);
+    padding-left: 8px;
   }
 
-  .small-cta {
-    font-size: 8.5px;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
+  .small-answer {
+    font-family: 'Special Elite', cursive;
+    font-size: 18px;
     color: var(--accent);
-    border: 1px solid var(--accent);
-    padding: 3px 8px;
+    line-height: 1.45;
+  }
+
+  .small-ep {
+    font-size: 8.5px;
+    color: var(--muted);
+    font-style: italic;
+    margin-top: 10px;
   }
 </style>
 </head>
@@ -219,11 +217,13 @@
   </div>
 </div>
 
-<!-- SMALL VIEW (half_h, half_v, quadrant) -->
+
+<!-- SMALL VIEW: shows answer -->
 <div id="small-view">
-  <div class="small-logo">The Office · Trivia</div>
-  <div class="small-hint" id="small-hint">New trivia on your full screen 📋</div>
-  <div class="small-cta" id="small-cta">SEE QUESTION</div>
+  <div class="paper-grain"></div>
+  <div class="small-logo">THE OFFICE &middot; ANSWER</div>
+  <div class="small-answer" id="small-answer">Loading...</div>
+  <div class="small-ep" id="small-ep"></div>
 </div>
 
 <script>
@@ -399,15 +399,10 @@ function init() {
     document.getElementById('seed-disp').textContent = '#' + (seed % 10000);
 
   } else {
-    // Small views
+    // Small views — always show answer
     document.getElementById('small-view').style.display = 'flex';
-    if (mode === 'question') {
-      document.getElementById('small-hint').textContent = 'Trivia question on full screen 📋';
-      document.getElementById('small-cta').textContent = 'SEE QUESTION';
-    } else {
-      document.getElementById('small-hint').textContent = 'Answer revealed on full screen ✓';
-      document.getElementById('small-cta').textContent = 'SEE ANSWER';
-    }
+    document.getElementById('small-answer').textContent = item.a;
+    document.getElementById('small-ep').textContent = item.cat + ' · ' + item.ep;
   }
 }
 
