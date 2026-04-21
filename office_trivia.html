@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Office Trivia</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Special+Elite&family=Courier+Prime:wght@400;700&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --paper: #f5f0e8;
+    --ink: #1a1a1a;
+    --accent: #c0392b;
+    --muted: #7a6e5f;
+    --border: #2a2a2a;
+  }
+
+  html, body {
+    width: 100%; height: 100%;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Courier Prime', monospace;
+    overflow: hidden;
+  }
+
+  /* ── FULL VIEW ── */
+  #full-view {
+    display: none;
+    width: 100%; height: 100%;
+    position: relative;
+    padding: 18px 20px 14px;
+    flex-direction: column;
+  }
+
+  .paper-grain {
+    position: absolute; inset: 0;
+    background-image:
+      repeating-linear-gradient(0deg, transparent, transparent 27px, rgba(0,0,0,0.04) 27px, rgba(0,0,0,0.04) 28px),
+      repeating-linear-gradient(90deg, transparent, transparent 40px, rgba(0,0,0,0.015) 40px, rgba(0,0,0,0.015) 41px);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .content-wrap {
+    position: relative; z-index: 1;
+    display: flex; flex-direction: column;
+    height: 100%;
+  }
+
+  .top-bar {
+    display: flex; align-items: center; justify-content: space-between;
+    border-bottom: 2px solid var(--border);
+    padding-bottom: 8px;
+    margin-bottom: 12px;
+  }
+
+  .show-label {
+    font-family: 'Special Elite', cursive;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .dunder-badge {
+    font-family: 'Special Elite', cursive;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    color: var(--paper);
+    background: var(--ink);
+    padding: 2px 7px;
+    border: 1px solid var(--ink);
+  }
+
+  .mode-label {
+    font-size: 9px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 700;
+  }
+
+  .main-content {
+    flex: 1;
+    display: flex; flex-direction: column;
+    justify-content: center;
+  }
+
+  .category-tag {
+    font-size: 9px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 10px;
+    border-left: 3px solid var(--accent);
+    padding-left: 8px;
+  }
+
+  .trivia-text {
+    font-family: 'Special Elite', cursive;
+    font-size: 17px;
+    line-height: 1.55;
+    color: var(--ink);
+    max-width: 95%;
+  }
+
+  .trivia-text.answer-text {
+    font-size: 20px;
+    color: var(--accent);
+    line-height: 1.4;
+  }
+
+  .bottom-bar {
+    display: flex; align-items: center; justify-content: space-between;
+    border-top: 1px solid rgba(0,0,0,0.15);
+    padding-top: 8px;
+    margin-top: 10px;
+  }
+
+  .ep-ref {
+    font-size: 8.5px;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+    font-style: italic;
+  }
+
+  .seed-num {
+    font-size: 8px;
+    color: rgba(0,0,0,0.2);
+    letter-spacing: 0.1em;
+  }
+
+  /* Q decoration */
+  .q-mark {
+    font-family: 'Special Elite', cursive;
+    font-size: 72px;
+    color: rgba(0,0,0,0.04);
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-60%);
+    pointer-events: none;
+    z-index: 0;
+    line-height: 1;
+  }
+
+  .checkmark {
+    font-size: 52px;
+    color: rgba(192,57,43,0.07);
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-60%);
+    pointer-events: none;
+    z-index: 0;
+    line-height: 1;
+  }
+
+  /* ── SMALL VIEW ── */
+  #small-view {
+    display: none;
+    width: 100%; height: 100%;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    text-align: center;
+  }
+
+  .small-logo {
+    font-family: 'Special Elite', cursive;
+    font-size: 13px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+
+  .small-hint {
+    font-family: 'Special Elite', cursive;
+    font-size: 15px;
+    color: var(--ink);
+    line-height: 1.4;
+    margin-bottom: 10px;
+  }
+
+  .small-cta {
+    font-size: 8.5px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    border: 1px solid var(--accent);
+    padding: 3px 8px;
+  }
+</style>
+</head>
+<body>
+
+<!-- FULL VIEW -->
+<div id="full-view">
+  <div class="paper-grain"></div>
+  <div class="content-wrap">
+    <div class="top-bar">
+      <span class="show-label">The Office — Trivia</span>
+      <span class="dunder-badge">DUNDER MIFFLIN</span>
+      <span class="mode-label" id="mode-badge">QUESTION</span>
+    </div>
+    <div class="main-content">
+      <div class="category-tag" id="category-tag">Season 2 · Characters</div>
+      <div class="trivia-text" id="trivia-text">Loading...</div>
+      <div class="q-mark" id="deco-q">?</div>
+    </div>
+    <div class="bottom-bar">
+      <span class="ep-ref" id="ep-ref"></span>
+      <span class="seed-num" id="seed-disp"></span>
+    </div>
+  </div>
+</div>
+
+<!-- SMALL VIEW (half_h, half_v, quadrant) -->
+<div id="small-view">
+  <div class="small-logo">The Office · Trivia</div>
+  <div class="small-hint" id="small-hint">New trivia on your full screen 📋</div>
+  <div class="small-cta" id="small-cta">SEE QUESTION</div>
+</div>
+
+<script>
+// ── TRIVIA DATA ──
+const TRIVIA = [
+  { q:"What is the name of Dunder Mifflin's Scranton branch manager at the start of the series?", a:"Michael Scott", cat:"Characters", ep:"Pilot (S1E1)" },
+  { q:"What is Dwight Schrute's official job title at Dunder Mifflin?", a:"Assistant (to the) Regional Manager", cat:"Characters", ep:"S1" },
+  { q:"What type of farm does Dwight own and operate?", a:"Beet farm (Schrute Farms)", cat:"Dwight", ep:"S2" },
+  { q:"What is the name of the paper company founded by Michael Scott after he leaves Dunder Mifflin?", a:"Michael Scott Paper Company", cat:"Michael", ep:"S5E23" },
+  { q:"Who does Jim Halpert eventually marry?", a:"Pam Beesly", cat:"Romance", ep:"S6E4" },
+  { q:"What is the name of Pam's first fiancé before Jim?", a:"Roy Anderson", cat:"Romance", ep:"S1–S3" },
+  { q:"What sport does Kevin Malone play in a band?", a:"He plays drums — his band is called Scrantonicity", cat:"Characters", ep:"S2E10" },
+  { q:"What is the name of Dunder Mifflin's chief rival paper company?", a:"Staples (and later Sabre)", cat:"Business", ep:"Various" },
+  { q:"Which character famously declares 'I am the greatest A-chieve-r this town has ever seen'?", a:"Michael Scott", cat:"Michael", ep:"S3" },
+  { q:"What city is the Scranton branch of Dunder Mifflin located in?", a:"Scranton, Pennsylvania", cat:"Setting", ep:"Pilot" },
+  { q:"What is the full name of the character known as 'Creed'?", a:"Creed Bratton", cat:"Characters", ep:"Various" },
+  { q:"What does Michael Scott burn his foot on at the start of Season 2?", a:"A George Foreman grill", cat:"Michael", ep:"S2E1" },
+  { q:"Who is the documentary film crew ostensibly making a film about?", a:"The everyday lives of office workers at Dunder Mifflin Scranton", cat:"Meta", ep:"Pilot" },
+  { q:"What is the name of the HR representative who replaces Toby briefly?", a:"Charles Miner (VP) / Holly Flax (HR)", cat:"Characters", ep:"S5" },
+  { q:"What holiday does Michael Scott invent to celebrate himself?", a:"\"Pretzel Day\" is a fan fave but he also celebrates his own birthday elaborately — the invented holiday is Michael's birthday", cat:"Michael", ep:"S2E19" },
+  { q:"What is Angela's last name?", a:"Martin", cat:"Characters", ep:"S1" },
+  { q:"What is the name of the annex where Toby, Kelly, and Ryan work?", a:"The annex (no official name, just 'the annex')", cat:"Setting", ep:"Various" },
+  { q:"What fictional disease does Michael claim he has to get out of work?", a:"He claims various ailments; most notably 'I have a disease' — also Caprice's disease in a play episode", cat:"Michael", ep:"Various" },
+  { q:"What country does Dwight say is the origin of the phrase 'No man is an island'?", a:"John Donne wrote it — Dwight would attribute it to himself or Germany", cat:"Dwight", ep:"Various" },
+  { q:"What is the name of Meredith's son who appears in the show?", a:"Jake", cat:"Characters", ep:"S3" },
+  { q:"What does the acronym 'WUPHF' stand for in Ryan's startup?", a:"It's a social network that sends messages across all platforms simultaneously — no official acronym expansion given", cat:"Ryan", ep:"S7E9" },
+  { q:"What is Stanley Hudson's hobby outside of work?", a:"Pretzel Day enthusiasm and crossword puzzles", cat:"Characters", ep:"Various" },
+  { q:"Which employee hides a camera in the office to spy on his coworkers?", a:"Dwight Schrute", cat:"Dwight", ep:"S2" },
+  { q:"What is the name of the spin-off branch Michael tries to visit in Colorado?", a:"There is no Colorado branch — he visits the Buffalo branch briefly", cat:"Business", ep:"S3" },
+  { q:"What band does Andy Bernard join after leaving Dunder Mifflin?", a:"He pursues a solo music/YouTube career", cat:"Andy", ep:"S9" },
+  { q:"What is Phyllis's maiden name?", a:"Lapin (she becomes Phyllis Vance)", cat:"Characters", ep:"S3E16" },
+  { q:"What does Jim put in Jell-O in the very first episode?", a:"Dwight's stapler", cat:"Jim & Dwight", ep:"S1E1" },
+  { q:"What position does Darryl Philbin hold at Dunder Mifflin?", a:"Warehouse foreman, later moves to the office and eventually to Athlead/Athleap", cat:"Characters", ep:"Various" },
+  { q:"What is the name of Michael Scott's improv troupe?", a:"Icarus (he joins a local improv group, not his own named troupe)", cat:"Michael", ep:"S3" },
+  { q:"What college did Ryan Howard attend?", a:"He got his MBA from University of Scranton", cat:"Ryan", ep:"S3" },
+  { q:"What is the name of the building Dunder Mifflin Scranton is located in?", a:"Scranton Business Park", cat:"Setting", ep:"Various" },
+  { q:"Who plays Threat Level Midnight's lead character Michael Scarn?", a:"Michael Scott (written, directed, and starring himself)", cat:"Michael", ep:"S7E17" },
+  { q:"What is the name of Michael Scott's girlfriend who also becomes an HR rep?", a:"Holly Flax", cat:"Romance", ep:"S4–S7" },
+  { q:"What object does Dwight use to test employees' fire safety knowledge?", a:"He sets an actual fire (waste bin) in the office", cat:"Dwight", ep:"S5E14" },
+  { q:"What is Kevin Malone's famous chili known for?", a:"A secret family recipe he's made for years — he drops the entire pot", cat:"Kevin", ep:"S5E26" },
+  { q:"What does Oscar Martinez specialize in at Dunder Mifflin?", a:"Accounting", cat:"Characters", ep:"Various" },
+  { q:"What is the name of the bar where the office workers frequently hang out?", a:"Poor Richard's Pub", cat:"Setting", ep:"Various" },
+  { q:"Who gives birth in the episode 'Delivery'?", a:"Pam Halpert", cat:"Romance", ep:"S6E17" },
+  { q:"What is the name of Michael's movie-within-the-show?", a:"Threat Level Midnight", cat:"Michael", ep:"S7E17" },
+  { q:"What does Dwight Schrute consider his second-in-command title?", a:"Assistant Regional Manager (he insists 'Assistant TO the Regional Manager')", cat:"Dwight", ep:"S1" },
+  { q:"What sport does Michael claim to be great at in 'Beach Games'?", a:"Sumo wrestling, coal walking, and general beach games — he picks sumo", cat:"Michael", ep:"S3E23" },
+  { q:"What is the name of Angela's favourite cat?", a:"Sprinkles", cat:"Angela", ep:"S4E1" },
+  { q:"Who kills Sprinkles the cat?", a:"Dwight Schrute (he euthanizes the cat)", cat:"Angela", ep:"S4E1" },
+  { q:"What is Jim Halpert's nickname for Dwight?", a:"Various — most notably he just pranks him; no single nickname, but 'Dwight' said with a sigh", cat:"Jim & Dwight", ep:"Various" },
+  { q:"What job does Michael Scott take after leaving Dunder Mifflin?", a:"He moves to Colorado with Holly and they get engaged", cat:"Michael", ep:"S7" },
+  { q:"What is the name of the company that acquires Dunder Mifflin?", a:"Sabre (pronounced 'SAY-bree')", cat:"Business", ep:"S6E15" },
+  { q:"Who is the CEO of Sabre when it acquires Dunder Mifflin?", a:"Jo Bennett", cat:"Business", ep:"S6–S7" },
+  { q:"What does Dwight build on top of the office building?", a:"A tower / fort — he builds a workspace fort in the office, and later a hay bale fort", cat:"Dwight", ep:"Various" },
+  { q:"What is the relationship between Dwight and Mose?", a:"They are cousins", cat:"Dwight", ep:"Various" },
+  { q:"What instrument does Andy Bernard play?", a:"The banjo (and a cappella singing)", cat:"Andy", ep:"Various" },
+  { q:"Where did Andy go to college?", a:"Cornell University", cat:"Andy", ep:"Various" },
+  { q:"What is the name of the warehouse worker who becomes a rapper?", a:"Darryl does not become a rapper — you may be thinking of the brief rap in the 'Lazy Scranton' video with Michael", cat:"Characters", ep:"S3E2" },
+  { q:"What was the name of the Dunder Mifflin Scranton branch's biggest client who was won back by Jim?", a:"Hammermill (one of several; Jim wins back various clients)", cat:"Business", ep:"S3" },
+  { q:"What is Pam's middle name?", a:"Morgan — Pamela Morgan Beesly/Halpert", cat:"Characters", ep:"Various" },
+  { q:"What does Ryan's character eventually become in the later seasons?", a:"He cycles through sales rep, VP, temp, and ends up back as a temp/loafer", cat:"Ryan", ep:"S1–S9" },
+  { q:"What is the name of Kelly Kapoor's obsession in terms of celebrity culture?", a:"She is obsessed with pop culture, celebrities, and especially Ryan Howard", cat:"Kelly", ep:"Various" },
+  { q:"What is the title of the job Michael Scott posts for his 'replacement' as a joke?", a:"Regional Manager (he posts a fake ad for his own job)", cat:"Michael", ep:"S3" },
+  { q:"What is the name of Jim and Pam's first child?", a:"Cecelia Marie Halpert (CeCe)", cat:"Romance", ep:"S6E17" },
+  { q:"What does Dwight do with his bobblehead collection?", a:"He keeps a bobblehead of himself on his desk", cat:"Dwight", ep:"S1E1" },
+  { q:"What is the name of the documentary that the office workers are filmed for?", a:"The documentary is never given an official title within the show", cat:"Meta", ep:"Various" },
+  { q:"What year did The Office (US) premiere on NBC?", a:"2005", cat:"Trivia", ep:"Pilot — March 24, 2005" },
+  { q:"How many seasons does the US version of The Office have?", a:"9 seasons", cat:"Trivia", ep:"2005–2013" },
+  { q:"What is the name of the salesman who replaces Michael Scott as manager?", a:"Deangelo Vickers (briefly), then Robert California, then Andy Bernard", cat:"Characters", ep:"S7" },
+  { q:"Who does Dwight Schrute ultimately marry in the series finale?", a:"Angela Martin", cat:"Romance", ep:"S9E25" },
+  { q:"What is the name of Dwight's Bed and Breakfast at Schrute Farms?", a:"Schrute Farms Bed and Breakfast", cat:"Dwight", ep:"S4E1" },
+  { q:"What does Michael Scott always say when he enters a room?", a:"'That's what she said' (his catchphrase)", cat:"Michael", ep:"Various" },
+  { q:"What is the name of the episode where the office holds a 'Pretzel Day'?", a:"'Product Recall' — Pretzel Day is a beloved recurring mention, officially in S3E21", cat:"Setting", ep:"S3E21" },
+  { q:"Who is the 'Scranton Strangler'?", a:"Never definitively revealed — the most suspected character is Toby's juror experience, Toby suspects George Howard Skub", cat:"Mystery", ep:"S7–S9" },
+  { q:"What does Kevin use as a substitute for currency in one episode?", a:"M&Ms (he makes his own candy economy)", cat:"Kevin", ep:"S4E9" },
+  { q:"What is the name of Andy's a cappella group at Cornell?", a:"Here Comes Treble", cat:"Andy", ep:"Various" },
+  { q:"What does Jim do with Dwight's stapler in the pilot?", a:"Encases it in Jell-O", cat:"Jim & Dwight", ep:"S1E1" },
+  { q:"What is the name of Michael's self-help book that he references?", a:"He references 'The Art of War' and his own ideas — no single self-help book is his trademark", cat:"Michael", ep:"Various" },
+  { q:"What is the name of the IT guy who Dwight frequently terrorizes?", a:"Hank (security guard) — the IT tech is referred to as 'the IT guy'; one named 'Nick'", cat:"Characters", ep:"Various" },
+  { q:"Who wins the Dundie Award for 'Longest Engagement' in the Dundies episode?", a:"Pam Beesly", cat:"Dundies", ep:"S2E1" },
+  { q:"What is the Dundie Award Michael gives to himself?", a:"'Best Boss' / 'Hottest in the Office' (varies by year)", cat:"Dundies", ep:"S2E1" },
+  { q:"What does Dwight do to prove he is a great salesman in 'The Client'?", a:"He demonstrates beet-growing and survival skills — the sales contest is various episodes", cat:"Dwight", ep:"Various" },
+  { q:"What is the name of the accounting trio at Dunder Mifflin?", a:"Kevin Malone, Angela Martin, Oscar Martinez", cat:"Characters", ep:"Various" },
+  { q:"What is the name of Darryl's daughter?", a:"Jada", cat:"Characters", ep:"S7–S8" },
+  { q:"Where does Jim get a new job offer that creates tension with Pam?", a:"Athlead (later Athleap) in Austin, Texas", cat:"Jim & Pam", ep:"S9" },
+  { q:"What is the name of the documentary crew's sound man who Pam briefly has feelings for?", a:"Brian", cat:"Romance", ep:"S9" },
+  { q:"What sport does Michael Scott try to learn to impress his boss in 'The Client'?", a:"Improv comedy (he takes classes)", cat:"Michael", ep:"S3" },
+  { q:"What is the nickname for the Dunder Mifflin Infinity website Michael Scott hates?", a:"'Dunder Mifflin Infinity' — Michael calls it a threat to paper sales", cat:"Business", ep:"S4E1" },
+  { q:"What does Kelly Kapoor claim to be an expert in during her interviews?", a:"She claims expertise in customer service and pop culture", cat:"Kelly", ep:"Various" },
+  { q:"What does Toby Flenderson always want to escape to?", a:"Costa Rica", cat:"Toby", ep:"Various" },
+  { q:"What season does Michael Scott leave the show?", a:"Season 7", cat:"Michael", ep:"S7E22" },
+  { q:"Who replaces Michael Scott as regional manager in Season 7?", a:"Deangelo Vickers (played by Will Ferrell)", cat:"Characters", ep:"S7E19" },
+  { q:"What is the name of the episode where the staff gets locked in the office?", a:"'The Negotiation' and other episodes — 'Launch Party' has a lock-in element; 'Koi Pond' is another", cat:"Episodes", ep:"Various" },
+  { q:"What does Jim Halpert sell before Dunder Mifflin paper?", a:"He has only ever worked at Dunder Mifflin Scranton (before Athlead)", cat:"Jim", ep:"Various" },
+  { q:"What is the name of the receptionist who replaces Pam when Pam goes to art school?", a:"Ronni (briefly), then Pam returns", cat:"Characters", ep:"S5" },
+  { q:"What is the name of the warehouse worker who wins the lottery?", a:"Darryl and the warehouse workers pool their lottery winnings", cat:"Characters", ep:"S7E9" },
+  { q:"What is Meredith Palmer's job title?", a:"Supplier Relations", cat:"Characters", ep:"Various" },
+  { q:"What does Dwight believe about bears?", a:"'Bears. Beets. Battlestar Galactica.' — he takes bears very seriously as threats", cat:"Dwight", ep:"S3E1" },
+  { q:"What is the name of the episode where Jim mimics Dwight?", a:"'Product Recall' — Jim dresses as Dwight in S3E21", cat:"Jim & Dwight", ep:"S3E21" },
+  { q:"What disease does Michael Scott accidentally give to his coworkers?", a:"A nursing home visit gives everyone pink eye, Michael spread it after an improper gel use", cat:"Michael", ep:"S2E6" },
+  { q:"What is the name of Dwight's girlfriend who works at the office?", a:"Angela Martin (secret relationship for years)", cat:"Romance", ep:"S2–S9" },
+  { q:"What is Robert California's real name on the show?", a:"Robert California — played by James Spader", cat:"Characters", ep:"S8" },
+  { q:"What does Andy Bernard get tattooed on his body?", a:"The Nard Dog logo / Cornell on his rear end (he threatens to, debate episode)", cat:"Andy", ep:"Various" },
+  { q:"What is the last episode of The Office called?", a:"'Finale'", cat:"Trivia", ep:"S9E25" },
+];
+
+// ── SEED / SYNC ──
+function getSeed() {
+  // Changes every 30 minutes — both instances stay in sync
+  const now = new Date();
+  const slot = Math.floor((now.getFullYear() * 10000 + (now.getMonth()+1) * 100 + now.getDate()) * 48 +
+    Math.floor((now.getHours() * 60 + now.getMinutes()) / 30));
+  return slot;
+}
+
+function seededRandom(seed) {
+  let s = seed;
+  return function() {
+    s = (s * 1664525 + 1013904223) & 0xffffffff;
+    return (s >>> 0) / 4294967296;
+  };
+}
+
+function getItem() {
+  const seed = getSeed();
+  const rng = seededRandom(seed);
+  const idx = Math.floor(rng() * TRIVIA.length);
+  return { item: TRIVIA[idx], seed };
+}
+
+// ── INIT ──
+function getMode() {
+  const params = new URLSearchParams(window.location.search);
+  return params.get('mode') || 'question'; // 'question' or 'answer'
+}
+
+function getViewSize() {
+  // TRMNL passes view param, or we detect from iframe size
+  const params = new URLSearchParams(window.location.search);
+  const v = params.get('view');
+  if (v) return v;
+  // fallback: width-based
+  const w = window.innerWidth;
+  if (w >= 700) return 'full';
+  if (w >= 400) return 'half';
+  return 'quadrant';
+}
+
+function init() {
+  const mode = getMode();
+  const view = getViewSize();
+  const { item, seed } = getItem();
+
+  if (view === 'full') {
+    document.getElementById('full-view').style.display = 'flex';
+
+    if (mode === 'question') {
+      document.getElementById('mode-badge').textContent = '❓ QUESTION';
+      document.getElementById('category-tag').textContent = item.cat.toUpperCase() + ' · ' + item.ep;
+      document.getElementById('trivia-text').textContent = item.q;
+      document.getElementById('trivia-text').classList.remove('answer-text');
+      document.getElementById('deco-q').textContent = '?';
+      document.getElementById('deco-q').className = 'q-mark';
+    } else {
+      document.getElementById('mode-badge').textContent = '✓ ANSWER';
+      document.getElementById('category-tag').textContent = item.cat.toUpperCase() + ' · ' + item.ep;
+      document.getElementById('trivia-text').textContent = item.a;
+      document.getElementById('trivia-text').classList.add('answer-text');
+      document.getElementById('deco-q').textContent = '✓';
+      document.getElementById('deco-q').className = 'checkmark';
+    }
+
+    document.getElementById('ep-ref').textContent = item.ep;
+    document.getElementById('seed-disp').textContent = '#' + (seed % 10000);
+
+  } else {
+    // Small views
+    document.getElementById('small-view').style.display = 'flex';
+    if (mode === 'question') {
+      document.getElementById('small-hint').textContent = 'Trivia question on full screen 📋';
+      document.getElementById('small-cta').textContent = 'SEE QUESTION';
+    } else {
+      document.getElementById('small-hint').textContent = 'Answer revealed on full screen ✓';
+      document.getElementById('small-cta').textContent = 'SEE ANSWER';
+    }
+  }
+}
+
+init();
+</script>
+</body>
+</html>
